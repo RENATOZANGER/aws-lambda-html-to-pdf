@@ -1,0 +1,65 @@
+name: Deploy Lambda Function
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        pip install boto3 pdfkit Jinja2
+        sudo apt-get update
+        #sudo apt-get install -y wkhtmltopdf
+
+    - name: Zip the Lambda function
+      run: |
+        cd lambda
+        zip -r ../lambda_function.zip .
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Deploy with Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: 0.12.x
+        run: |
+            cd terraform
+            terraform init
+            terraform apply -auto-approve
+
+    - name: Prepare wkhtmltopdf layer
+      run: |
+        wget https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.6/wkhtmltopdf-0.12.6-1.centos7.x86_64.rpm
+        yum install -y wkhtmltopdf-0.12.6-1.centos7.x86_64.rpm --downloadonly --downloaddir=.
+        mkdir -p wkhtmltopdf_layer/bin
+        cp usr/local/bin/wkhtmltopdf wkhtmltopdf_layer/bin/
+        cd wkhtmltopdf_layer
+        zip -r wkhtmltopdf_layer.zip .
+        mv wkhtmltopdf_layer.zip ../
+  
+    - name: Upload wkhtmltopdf layer to S3
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+        run: |
+            aws s3 cp wkhtmltopdf_layer.zip s3://${{ secrets.S3_BUCKET_NAME }}/wkhtmltopdf_layer.zip
+  
