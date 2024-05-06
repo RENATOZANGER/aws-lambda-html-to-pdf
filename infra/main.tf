@@ -27,7 +27,7 @@ resource "aws_lambda_function" "my_lambda" {
 
 resource "aws_lambda_layer_version" "wkhtmltopdf_layer" {
   layer_name = "wkhtmltopdf-layer"
-  s3_bucket  = aws_s3_bucket.lambda_bucket.id
+  s3_bucket  = "my-lambda-bucket-zip-htmltopdf"
   s3_key     = "wkhtmltopdf_layer.zip"
 
   compatible_runtimes = [var.python_version]
