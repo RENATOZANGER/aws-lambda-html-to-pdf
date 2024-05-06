@@ -13,103 +13,140 @@ on:
       - main
 
 jobs:
-  Create_buckets:
+#   Create_buckets:
+#     runs-on: ubuntu-latest
+#     steps:
+#     - name: Checkout repository
+#       uses: actions/checkout@v2
+    
+#     - name: Configure AWS Credentials
+#       uses: aws-actions/configure-aws-credentials@v1
+#       with:
+#         aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+#         aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+#         aws-region: ${{ env.REGION }}
+    
+#     - name: Check if bucket terraform exists
+#       id: check_bucket_terraform
+#       run: |
+#         if aws s3api head-bucket --bucket ${{ env.NAME_BUCKET_TERRAFORM }} 2>/dev/null; then
+#             echo "::set-output name=bucket_exists::true"
+#         else
+#             echo "::set-output name=bucket_exists::false"
+#         fi
+    
+#     - name: Create bucket terraform if not exists
+#       if: steps.check_bucket_terraform.outputs.bucket_exists == 'false'
+#       run: |
+#         aws s3api create-bucket --bucket ${{ env.NAME_BUCKET_TERRAFORM }} --region ${{ env.REGION }}
+
+#     - name: Check if bucket zip exists
+#       id: check_bucket_zip
+#       run: |
+#         if aws s3api head-bucket --bucket ${{ env.NAME_BUCKET_ZIP }} 2>/dev/null; then
+#             echo "::set-output name=bucket_exists::true"
+#         else
+#             echo "::set-output name=bucket_exists::false"
+#         fi
+    
+#     - name: Create bucket zip if not exists
+#       if: steps.check_bucket_zip.outputs.bucket_exists == 'false'
+#       run: |
+#         aws s3api create-bucket --bucket ${{ env.NAME_BUCKET_ZIP }} --region ${{ env.REGION }}
+  
+#   build:
+#     needs: Create_buckets
+#     runs-on: ubuntu-latest
+
+#     steps:
+#     - uses: actions/checkout@v2
+
+#     - name: Set up Python
+#       uses: actions/setup-python@v2
+#       with:
+#         python-version: '3.11'
+
+#     - name: Install dependencies
+#       run: |
+#         pip install boto3 pdfkit Jinja2
+#         sudo apt-get update
+#         #sudo apt-get install -y wkhtmltopdf
+
+#     - name: Zip the Lambda function
+#       run: |
+#         cd lambda
+#         zip -r ../lambda_function.zip .
+
+#     - name: Upload lambda_function.zip to S3
+#       run: |
+#         aws s3 cp lambda_function.zip s3://${{ env.NAME_BUCKET_ZIP }}/lambda_function.zip
+#       env:
+#         AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
+#         AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
+#         AWS_DEFAULT_REGION: ${{ env.REGION }}
+    
+#     - name: Download wkhtmltox package
+#       run: |
+#             wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-4/wkhtmltox-0.12.6-4.amazonlinux2_lambda.zip
+      
+#     - name: Extract wkhtmltox package
+#       run: |
+#             unzip wkhtmltox-0.12.6-4.amazonlinux2_lambda.zip
+#             ls -l  # List the contents of the directory after extraction
+    
+#     - name: Prepare Wkhtmltopdf Layer
+#       run: |
+#             mkdir -p wkhtmltopdf_layer/bin
+#             cp bin/wkhtmltopdf wkhtmltopdf_layer/bin/
+#             cd wkhtmltopdf_layer
+#             zip -r wkhtmltopdf_layer.zip .
+#             mv wkhtmltopdf_layer.zip ../
+#             cd ..
+#             rm -rf wkhtmltox wkhtmltox-0.12.6-4.amazonlinux2_lambda.zip wkhtmltopdf_layer
+      
+  
+#     - name: Upload wkhtmltopdf layer to S3
+#       run: |
+#             aws s3 cp wkhtmltopdf_layer.zip s3://${{ env.NAME_BUCKET_ZIP }}/wkhtmltopdf_layer.zip
+#       env:
+#         AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
+#         AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
+#         AWS_DEFAULT_REGION: ${{ env.REGION }}
+  
+
+  deploy:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout repository
+    - name: Checkout Code
       uses: actions/checkout@v2
-    
+        
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.REGION }}
-    
-    - name: Check if bucket terraform exists
-      id: check_bucket_terraform
-      run: |
-        if aws s3api head-bucket --bucket ${{ env.NAME_BUCKET_TERRAFORM }} 2>/dev/null; then
-            echo "::set-output name=bucket_exists::true"
-        else
-            echo "::set-output name=bucket_exists::false"
-        fi
-    
-    - name: Create bucket terraform if not exists
-      if: steps.check_bucket_terraform.outputs.bucket_exists == 'false'
-      run: |
-        aws s3api create-bucket --bucket ${{ env.NAME_BUCKET_TERRAFORM }} --region ${{ env.REGION }}
-
-    - name: Check if bucket zip exists
-      id: check_bucket_zip
-      run: |
-        if aws s3api head-bucket --bucket ${{ env.NAME_BUCKET_ZIP }} 2>/dev/null; then
-            echo "::set-output name=bucket_exists::true"
-        else
-            echo "::set-output name=bucket_exists::false"
-        fi
-    
-    - name: Create bucket zip if not exists
-      if: steps.check_bucket_zip.outputs.bucket_exists == 'false'
-      run: |
-        aws s3api create-bucket --bucket ${{ env.NAME_BUCKET_ZIP }} --region ${{ env.REGION }}
-  
-  build:
-    needs: Create_buckets
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.11'
-
-    - name: Install dependencies
-      run: |
-        pip install boto3 pdfkit Jinja2
-        sudo apt-get update
-        #sudo apt-get install -y wkhtmltopdf
-
-    - name: Zip the Lambda function
-      run: |
-        cd lambda
-        zip -r ../lambda_function.zip .
-
-    - name: Upload lambda_function.zip to S3
-      run: |
-        aws s3 cp lambda_function.zip s3://${{ env.NAME_BUCKET_ZIP }}/lambda_function.zip
-      env:
-        AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
-        AWS_DEFAULT_REGION: ${{ env.REGION }}
-    
-    - name: Download wkhtmltox package
-      run: |
-            wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-4/wkhtmltox-0.12.6-4.amazonlinux2_lambda.zip
-      
-    - name: Extract wkhtmltox package
-      run: |
-            unzip wkhtmltox-0.12.6-4.amazonlinux2_lambda.zip
-            ls -l  # List the contents of the directory after extraction
-    
-    - name: Prepare Wkhtmltopdf Layer
-      run: |
-            mkdir -p wkhtmltopdf_layer/bin
-            cp bin/wkhtmltopdf wkhtmltopdf_layer/bin/
-            cd wkhtmltopdf_layer
-            zip -r wkhtmltopdf_layer.zip .
-            mv wkhtmltopdf_layer.zip ../
-            cd ..
-            rm -rf wkhtmltox wkhtmltox-0.12.6-4.amazonlinux2_lambda.zip wkhtmltopdf_layer
-      
-  
-    - name: Upload wkhtmltopdf layer to S3
-      run: |
-            aws s3 cp wkhtmltopdf_layer.zip s3://${{ env.NAME_BUCKET_ZIP }}/wkhtmltopdf_layer.zip
-      env:
-        AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
-        AWS_DEFAULT_REGION: ${{ env.REGION }}
-  
+        
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+        
+    - name: Terraform Init
+      run: terraform init
+      working-directory: ./infra
+        
+    - name: Terraform Validate
+      run: terraform validate
+      working-directory: ./infra
+        
+    - name: Terraform Apply
+      run: terraform apply -auto-approve
+      working-directory: ./infra
+        
+    - name: Check Deployment Status
+      run: terraform output deployment_status
+      id: deployment_status
+        
+    - name: Rollback on Failure
+      if: ${{ steps.deployment_status.outputs.status != 'success' }}
+      run: terraform destroy -auto-approve
+        
