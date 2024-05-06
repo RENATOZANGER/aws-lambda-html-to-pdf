@@ -1,11 +1,59 @@
 name: Deploy Lambda Function
 
+env:
+    REGION: "us-east-1"
+    NAME_BUCKET_TERRAFORM: "lambda-html-to-pdf-remote-state"
+    NAME_BUCKET_ZIP: "my-lambda-bucket-zip-htmltopdf"
+    AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  
 on:
   push:
     branches:
       - main
 
 jobs:
+  Create_bucket:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.REGION }}
+    
+    - name: Check if bucket terraform exists
+      id: check_bucket_terraform
+      run: |
+        if aws s3api head-bucket --bucket ${{ env.NAME_BUCKET_TERRAFORM }} 2>/dev/null; then
+            echo "::set-output name=bucket_exists::true"
+        else
+            echo "::set-output name=bucket_exists::false"
+        fi
+    
+    - name: Create bucket terraform if not exists
+      if: steps.check_bucket_terraform.outputs.bucket_exists == 'false'
+      run: |
+        aws s3api create-bucket --bucket ${{ env.NAME_BUCKET_TERRAFORM }} --region ${{ env.REGION }}
+
+    - name: Check if bucket zip exists
+      id: check_bucket_zip
+      run: |
+        if aws s3api head-bucket --bucket ${{ env.NAME_BUCKET_ZIP }} 2>/dev/null; then
+            echo "::set-output name=bucket_exists::true"
+        else
+            echo "::set-output name=bucket_exists::false"
+        fi
+    
+    - name: Create bucket zip if not exists
+      if: steps.check_bucket_zip.outputs.bucket_exists == 'false'
+      run: |
+        aws s3api create-bucket --bucket ${{ env.NAME_BUCKET_ZIP }} --region ${{ env.REGION }}
+  
   deploy:
     runs-on: ubuntu-latest
 
@@ -27,22 +75,6 @@ jobs:
       run: |
         cd lambda
         zip -r ../lambda_function.zip .
-
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
-
-    - name: Deploy with Terraform
-      uses: hashicorp/setup-terraform@v1
-      with:
-        terraform_version: 0.12.x
-        run: |
-            cd terraform
-            terraform init
-            terraform apply -auto-approve
 
     - name: Download wkhtmltox package
       run: |
@@ -67,9 +99,9 @@ jobs:
     - name: Upload wkhtmltopdf layer to S3
       uses: aws-actions/configure-aws-credentials@v1
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
         run: |
-            aws s3 cp wkhtmltopdf_layer.zip s3://${{ secrets.S3_BUCKET_NAME }}/wkhtmltopdf_layer.zip
+            aws s3 cp wkhtmltopdf_layer.zip s3://${{ env.NAME_BUCKET_ZIP }}/wkhtmltopdf_layer.zip
   
