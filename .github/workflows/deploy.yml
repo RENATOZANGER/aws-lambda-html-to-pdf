@@ -56,7 +56,7 @@ jobs:
     - name: Prepare Wkhtmltopdf Layer
       run: |
             mkdir -p wkhtmltopdf_layer/bin
-            cp wkhtmltox/bin/wkhtmltopdf wkhtmltopdf_layer/bin/
+            cp bin/wkhtmltopdf wkhtmltopdf_layer/bin/
             cd wkhtmltopdf_layer
             zip -r wkhtmltopdf_layer.zip .
             mv wkhtmltopdf_layer.zip ../
