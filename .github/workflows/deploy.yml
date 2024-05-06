@@ -77,6 +77,14 @@ jobs:
         cd lambda
         zip -r ../lambda_function.zip .
 
+    - name: Upload lambda_function.zip to S3
+      run: |
+        aws s3 cp lambda_function.zip s3://${{ env.NAME_BUCKET_ZIP }}/lambda_function.zip
+      env:
+        AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: ${{ env.REGION }}
+    
     - name: Download wkhtmltox package
       run: |
             wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-4/wkhtmltox-0.12.6-4.amazonlinux2_lambda.zip
