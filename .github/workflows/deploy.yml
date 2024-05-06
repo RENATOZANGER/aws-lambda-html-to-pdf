@@ -44,15 +44,17 @@ jobs:
             terraform init
             terraform apply -auto-approve
 
-    - name: Prepare wkhtmltopdf layer
+    - name: Prepare Wkhtmltopdf Layer
       run: |
-        wget https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.6/wkhtmltopdf-0.12.6-1.centos7.x86_64.rpm
-        yum install -y wkhtmltopdf-0.12.6-1.centos7.x86_64.rpm --downloadonly --downloaddir=.
-        mkdir -p wkhtmltopdf_layer/bin
-        cp usr/local/bin/wkhtmltopdf wkhtmltopdf_layer/bin/
-        cd wkhtmltopdf_layer
-        zip -r wkhtmltopdf_layer.zip .
-        mv wkhtmltopdf_layer.zip ../
+            wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-4/wkhtmltox-0.12.6-4.amazonlinux2_lambda.zip
+            unzip wkhtmltox-0.12.6-4.amazonlinux2_lambda.zip
+            mkdir -p wkhtmltopdf_layer/bin
+            cp wkhtmltox/bin/wkhtmltopdf wkhtmltopdf_layer/bin/
+            cd wkhtmltopdf_layer
+            zip -r wkhtmltopdf_layer.zip .
+            mv wkhtmltopdf_layer.zip ../
+            cd ..
+            rm -rf wkhtmltox wkhtmltox-0.12.6-4.amazonlinux2_lambda.zip wkhtmltopdf_layer
   
     - name: Upload wkhtmltopdf layer to S3
       uses: aws-actions/configure-aws-credentials@v1
