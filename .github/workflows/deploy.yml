@@ -74,7 +74,7 @@ jobs:
 
     - name: Zip the Lambda function
       run: |
-        cd lambda
+        cd app
         zip -r ../lambda_function.zip .
 
     - name: Upload lambda_function.zip to S3
