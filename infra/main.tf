@@ -17,8 +17,10 @@ resource "aws_lambda_function" "my_lambda" {
   role          = aws_iam_role.lambda_role.arn
   timeout       = 90
 
-  s3_bucket = aws_s3_bucket.lambda_bucket.id
-  s3_key    = "${aws_s3_bucket_object.lambda_object.id}.zip"
+  source_code_hash = filebase64sha256("lambda_function.zip")
+
+  s3_bucket = "my-lambda-bucket-zip-htmltopdf"
+  s3_key    = "lambda_function.zip"
 
   layers = [aws_lambda_layer_version.wkhtmltopdf_layer.arn]
 }
