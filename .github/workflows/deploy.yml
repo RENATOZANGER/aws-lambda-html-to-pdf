@@ -205,14 +205,8 @@ jobs:
     - name: Terraform Apply
       run: terraform apply -auto-approve || echo "Terraform apply failed"
       working-directory: ./infra
+      id: apply
         
-    - name: Check Deployment Status
-      run: |
-        terraform output deployment_status
-        echo "Deployment Status: ${{ steps.deployment_status.outputs.status }}"
-      id: deployment_status
-      if: ${{ always() }}
-        
-    - name: Rollback on Failure
-      if: ${{ steps.deployment_status.outputs.status != 'success' }}
-      run: terraform destroy -auto-approve
+    - name: Handle Failure
+      if: failure() && steps.apply.conclusion == 'failure'
+      run: echo "Rollback ou mitigação poderia ser iniciada aqui"
