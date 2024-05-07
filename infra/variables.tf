@@ -22,10 +22,10 @@ variable "role_lambda_name" {
   default     = "lambda_role"
 }
 
-variable "bucket_name" {
+variable "NAME_BUCKET_ZIP" {
   description = "bucket name"
   type        = string
-  default     = "lambda-html-to-pdf-remote-state"
+  default     = "my-lambda-bucket-zip-htmltopdf"
 }
 
 variable "python_version" {
