@@ -78,9 +78,8 @@ jobs:
 
     - name: Copy code
       run: |
-        #cd app
-        #zip -r ../lambda_function.zip .
-        cp app temp/
+        rm -rf temp/app 
+        cp -r app temp/
     
     - name: Zip files
       run: |
