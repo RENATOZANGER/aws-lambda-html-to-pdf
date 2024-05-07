@@ -72,8 +72,12 @@ jobs:
     
     - name: Copy dependencies
       run: |
-        mkdir temp
-        cp -r ~/.local/lib/python3.11/site-packages/* temp/
+        mkdir -p temp
+        if [ -n "$(ls -A ~/.local/lib/python3.11/site-packages/)" ]; then
+          cp -r ~/.local/lib/python3.11/site-packages/* temp/
+        else
+          echo "No dependencies found in ~/.local/lib/python3.11/site-packages/"
+        fi
 
     - name: Copy code
       run: |
