@@ -73,10 +73,7 @@ jobs:
     - name: Copy dependencies
       run: |
         mkdir temp
-        if [ ! -d temp/temp ]; then
-            cp -r ./* temp/
-            cp -r ~/.local/lib/python3.11/site-packages/* temp/
-        fi
+        cp -r ~/.local/lib/python3.11/site-packages/* temp/
 
     - name: Copy code
       run: |
