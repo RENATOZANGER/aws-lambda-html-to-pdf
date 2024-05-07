@@ -13,6 +13,31 @@ on:
       - main
 
 jobs:
+  destroy:
+    runs-on: ubuntu-latest
+    if: needs.read-yaml.outputs.output1 == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+    
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.REGION }}
+    
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+    
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./infra
+    
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
+        working-directory: ./infra
+
 #   Create_buckets:
 #     runs-on: ubuntu-latest
 #     steps:
