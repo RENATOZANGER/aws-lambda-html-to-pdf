@@ -37,8 +37,8 @@ data "aws_iam_policy_document" "lambda_policy" {
       "s3:PutObject"
     ]
     resources = [
-      "arn:aws:s3:::result-html-to-pdf",
-      "arn:aws:s3:::result-html-to-pdf/*"
+      "arn:aws:s3:::my-lambda-bucket-htmltopdf",
+      "arn:aws:s3:::my-lambda-bucket-htmltopdf/*"
     ]
   }
 }

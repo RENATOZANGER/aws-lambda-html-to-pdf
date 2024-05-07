@@ -17,7 +17,7 @@ resource "aws_lambda_function" "my_lambda" {
   role          = aws_iam_role.lambda_role.arn
   timeout       = 90
 
-  s3_bucket = var.NAME_BUCKET_ZIP
+  s3_bucket = var.NAME_BUCKET_APP
   s3_key    = "lambda_function.zip"
 
   layers = [aws_lambda_layer_version.wkhtmltopdf_layer.arn]
@@ -25,8 +25,8 @@ resource "aws_lambda_function" "my_lambda" {
 
 resource "aws_lambda_layer_version" "wkhtmltopdf_layer" {
   layer_name = "wkhtmltopdf-layer"
-  s3_bucket  = var.NAME_BUCKET_ZIP
-  s3_key     = "wkhtmltopdf.zi"
+  s3_bucket  = var.NAME_BUCKET_APP
+  s3_key     = "wkhtmltopdf.zip"
 
   compatible_runtimes = [var.python_version]
 }
