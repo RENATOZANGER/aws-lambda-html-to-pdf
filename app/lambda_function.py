@@ -11,7 +11,8 @@ def handler(event, context):
         'idade': event['idade']
     }
     template = Environment(loader=FileSystemLoader('.')).get_template('app/form.html').render(dados)
-    config = pdfkit.configuration(wkhtmltopdf='/usr/local/bin/wkhtmltopdf')
+    #config = pdfkit.configuration(wkhtmltopdf='/usr/local/bin/wkhtmltopdf')
+    config = pdfkit.configuration(wkhtmltopdf='wkhtmltopdf')
     pdf = pdfkit.from_string(template, configuration=config)
 
     s3.put_object(Bucket='my-lambda-bucket-htmltopdf', Key='formulario.pdf', Body=pdf)

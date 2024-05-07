@@ -107,7 +107,6 @@ jobs:
             mv wkhtmltopdf_layer.zip ../
             cd ..
             rm -rf wkhtmltox wkhtmltox-0.12.6-4.amazonlinux2_lambda.zip wkhtmltopdf_layer
-      
   
     - name: Upload wkhtmltopdf layer to S3
       run: |
