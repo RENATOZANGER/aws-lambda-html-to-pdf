@@ -163,6 +163,7 @@ jobs:
       run: |
             wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-4/wkhtmltox-0.12.6-4.amazonlinux2_lambda.zip
             mv wkhtmltox-0.12.6-4.amazonlinux2_lambda.zip wkhtmltopdf.zip
+    
     - name: Upload wkhtmltopdf layer to S3
       run: |
             aws s3 cp wkhtmltopdf.zip s3://${{ env.NAME_BUCKET_ZIP }}/wkhtmltopdf.zip
@@ -206,10 +207,11 @@ jobs:
       working-directory: ./infra
         
     - name: Check Deployment Status
-      run: terraform output deployment_status
+      run: |
+        terraform output deployment_status
+        echo "Deployment Status: ${{ steps.deployment_status.outputs.status }}"
       id: deployment_status
         
     - name: Rollback on Failure
       if: ${{ steps.deployment_status.outputs.status != 'success' }}
       run: terraform destroy -auto-approve
-        
