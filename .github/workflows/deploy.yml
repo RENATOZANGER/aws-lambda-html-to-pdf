@@ -207,6 +207,25 @@ jobs:
       working-directory: ./infra
       id: apply
         
-    - name: Handle Failure
-      if: failure() && steps.apply.conclusion == 'failure'
-      run: echo "Rollback ou mitigação poderia ser iniciada aqui"
+      
+  failure:
+    runs-on: ubuntu-latest
+    needs: 
+      - read-yaml
+      - Create_buckets
+      - build
+    if: needs.read-yaml.outputs.output1 == 'false' && failure()
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+            
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.REGION }}
+      
+      - name: Handle Failure
+
+        run: echo "Rollback ou mitigação poderia ser iniciada aqui"
