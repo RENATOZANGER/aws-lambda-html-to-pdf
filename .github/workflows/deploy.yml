@@ -13,73 +13,119 @@ on:
       - main
 
 jobs:
-#   destroy:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v2
-    
-#       - name: Configure AWS Credentials
-#         uses: aws-actions/configure-aws-credentials@v1
-#         with:
-#           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-#           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-#           aws-region: ${{ env.REGION }}
-    
-#       - name: Setup Terraform
-#         uses: hashicorp/setup-terraform@v1
-    
-#       - name: Terraform Init
-#         run: terraform init
-#         working-directory: ./infra
-    
-#       - name: Terraform Destroy
-#         run: terraform destroy -auto-approve
-#         working-directory: ./infra
+  read-yaml:
+    runs-on: ubuntu-latest
+    outputs:
+      output1: ${{ steps.step1.outputs.destroy }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+          
+      - name: read-yaml-file
+        uses: pietrobolcato/action-read-yaml@1.0.0
+        id: read_action_js
+        with:
+          config: ${{ github.workspace }}/destroy.yml
+          
+      - name: use-yaml-file
+        id: step1
+        run: |
+            echo "::set-output name=destroy::${{ steps.read_action_js.outputs['destroy'] }}"
 
-#   Create_buckets:
-#     runs-on: ubuntu-latest
-#     steps:
-#     - name: Checkout repository
-#       uses: actions/checkout@v2
+  destroy:
+    needs: read-yaml
+    runs-on: ubuntu-latest
+    if: needs.read-yaml.outputs.output1 == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
     
-#     - name: Configure AWS Credentials
-#       uses: aws-actions/configure-aws-credentials@v1
-#       with:
-#         aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-#         aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-#         aws-region: ${{ env.REGION }}
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.REGION }}
     
-#     - name: Check if bucket terraform exists
-#       id: check_bucket_terraform
-#       run: |
-#         if aws s3api head-bucket --bucket ${{ env.NAME_BUCKET_TERRAFORM }} 2>/dev/null; then
-#             echo "::set-output name=bucket_exists::true"
-#         else
-#             echo "::set-output name=bucket_exists::false"
-#         fi
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
     
-#     - name: Create bucket terraform if not exists
-#       if: steps.check_bucket_terraform.outputs.bucket_exists == 'false'
-#       run: |
-#         aws s3api create-bucket --bucket ${{ env.NAME_BUCKET_TERRAFORM }} --region ${{ env.REGION }}
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./infra
+    
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
+        working-directory: ./infra
+    
+      - name: Delete all objects and versions from the bucket terraform
+        run: |
+          aws s3api delete-objects --bucket ${{ env.NAME_BUCKET_TERRAFORM }} \
+          --delete "$(aws s3api list-object-versions --bucket ${{ env.NAME_BUCKET_TERRAFORM }} | \
+          jq '{Objects: [.Versions[] | {Key:.Key, VersionId : .VersionId}], Quiet: false}')"
+        
+      - name: Delete the bucket terraform
+        run: |
+          aws s3api delete-bucket --bucket ${{ env.NAME_BUCKET_TERRAFORM }} --region ${{ env.REGION }}
 
-#     - name: Check if bucket zip exists
-#       id: check_bucket_zip
-#       run: |
-#         if aws s3api head-bucket --bucket ${{ env.NAME_BUCKET_ZIP }} 2>/dev/null; then
-#             echo "::set-output name=bucket_exists::true"
-#         else
-#             echo "::set-output name=bucket_exists::false"
-#         fi
+      - name: Delete all objects and versions from the bucket zip
+        run: |
+          aws s3api delete-objects --bucket ${{ env.NAME_BUCKET_ZIP }} \
+          --delete "$(aws s3api list-object-versions --bucket ${{ env.NAME_BUCKET_ZIP }} | \
+          jq '{Objects: [.Versions[] | {Key:.Key, VersionId : .VersionId}], Quiet: false}')"
+        
+      - name: Delete the bucket zip
+        run: |
+          aws s3api delete-bucket --bucket ${{ env.NAME_BUCKET_ZIP }} --region ${{ env.REGION }}
+
+  Create_buckets:
+    needs: read-yaml
+    if: needs.read-yaml.outputs.output1 == 'false'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
     
-#     - name: Create bucket zip if not exists
-#       if: steps.check_bucket_zip.outputs.bucket_exists == 'false'
-#       run: |
-#         aws s3api create-bucket --bucket ${{ env.NAME_BUCKET_ZIP }} --region ${{ env.REGION }}
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.REGION }}
+    
+    - name: Check if bucket terraform exists
+      id: check_bucket_terraform
+      run: |
+        if aws s3api head-bucket --bucket ${{ env.NAME_BUCKET_TERRAFORM }} 2>/dev/null; then
+            echo "::set-output name=bucket_exists::true"
+        else
+            echo "::set-output name=bucket_exists::false"
+        fi
+    
+    - name: Create bucket terraform if not exists
+      if: steps.check_bucket_terraform.outputs.bucket_exists == 'false'
+      run: |
+        aws s3api create-bucket --bucket ${{ env.NAME_BUCKET_TERRAFORM }} --region ${{ env.REGION }}
+
+    - name: Check if bucket zip exists
+      id: check_bucket_zip
+      run: |
+        if aws s3api head-bucket --bucket ${{ env.NAME_BUCKET_ZIP }} 2>/dev/null; then
+            echo "::set-output name=bucket_exists::true"
+        else
+            echo "::set-output name=bucket_exists::false"
+        fi
+    
+    - name: Create bucket zip if not exists
+      if: steps.check_bucket_zip.outputs.bucket_exists == 'false'
+      run: |
+        aws s3api create-bucket --bucket ${{ env.NAME_BUCKET_ZIP }} --region ${{ env.REGION }}
   
   build:
-    #needs: Create_buckets
+    needs: 
+      - read-yaml
+      - Create_buckets
+    if: needs.read-yaml.outputs.output1 == 'false'
     runs-on: ubuntu-latest
 
     steps:
@@ -129,8 +175,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: 
-    #  - Create_buckets
-      - build
+        - read-yaml
+        - Create_buckets
+        - build
+    if: needs.read-yaml.outputs.output1 == 'false'
     steps:
     - name: Checkout Code
       uses: actions/checkout@v2
