@@ -135,7 +135,7 @@ jobs:
     - name: Upload wkhtmltopdf layer to S3
       run: |
             #aws s3 cp wkhtmltopdf_layer.zip s3://${{ env.NAME_BUCKET_ZIP }}/wkhtmltopdf_layer.zip
-            aws s3 cp wkhtmltopdf_layer.zip s3://${{ env.NAME_BUCKET_ZIP }}/wkhtmltox-0.12.6-4.amazonlinux2_lambda.zip
+            aws s3 cp wkhtmltox-0.12.6-4.amazonlinux2_lambda.zip s3://${{ env.NAME_BUCKET_ZIP }}/wkhtmltox-0.12.6-4.amazonlinux2_lambda.zip
       env:
         AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
