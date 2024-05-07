@@ -214,6 +214,7 @@ jobs:
       - read-yaml
       - Create_buckets
       - build
+      - deploy
     if: needs.read-yaml.outputs.output1 == 'false' && failure()
     steps:
       - name: Checkout Code
