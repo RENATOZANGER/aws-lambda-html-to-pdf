@@ -1,5 +1,4 @@
 import boto3
-import os
 import pdfkit
 from jinja2 import Environment, FileSystemLoader
 
@@ -11,7 +10,7 @@ def handler(event, context):
         'nome': event['nome'],
         'idade': event['idade']
     }
-    template = Environment(loader=FileSystemLoader('.')).get_template('form.html').render(dados)
+    template = Environment(loader=FileSystemLoader('.')).get_template('app/form.html').render(dados)
     config = pdfkit.configuration(wkhtmltopdf='/usr/local/bin/wkhtmltopdf')
     pdf = pdfkit.from_string(template, configuration=config)
 

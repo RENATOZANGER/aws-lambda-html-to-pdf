@@ -13,7 +13,7 @@ terraform {
 resource "aws_lambda_function" "my_lambda" {
   runtime       = var.python_version
   function_name = var.lambda_name
-  handler       = "lambda_function.handler"
+  handler       = "app.lambda_function.handler"
   role          = aws_iam_role.lambda_role.arn
   timeout       = 90
 
