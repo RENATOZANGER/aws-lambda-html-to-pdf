@@ -78,8 +78,9 @@ jobs:
 
     - name: Copy code
       run: |
-        rm -rf temp/app 
+       if [ ! -d temp/app ]; then  # Verifica se o diretório temp/app não existe
         cp -r app temp/
+       fi
     
     - name: Zip files
       run: |
