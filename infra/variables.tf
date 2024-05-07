@@ -25,7 +25,7 @@ variable "role_lambda_name" {
 variable "NAME_BUCKET_APP" {
   description = "bucket name"
   type        = string
-  default     = "my-lambda-bucket-htmltopdf"
+  default     = "html-to-pdf-application"
 }
 
 variable "python_version" {

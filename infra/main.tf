@@ -4,8 +4,8 @@ provider "aws" {
 
 terraform {
   backend "s3" {
-    bucket = "lambda-html-to-pdf-remote-state"
-    key    = "lambda-html-to-pdf/terraform.tfstate"
+    bucket = "html-to-pdf-remote-state"
+    key    = "remote-state/terraform.tfstate"
     region = "us-east-1"
   }
 }

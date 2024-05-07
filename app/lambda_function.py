@@ -7,12 +7,12 @@ s3 = boto3.client('s3')
 
 def handler(event, context):
     dados = {
-        'nome': event['nome'],
-        'idade': event['idade']
+        'name': event['name'],
+        'age': event['age']
     }
     template = Environment(loader=FileSystemLoader('.')).get_template('app/form.html').render(dados)
     #config = pdfkit.configuration(wkhtmltopdf='/usr/local/bin/wkhtmltopdf')
     config = pdfkit.configuration(wkhtmltopdf='/opt/bin/wkhtmltopdf')
     pdf = pdfkit.from_string(template, configuration=config)
 
-    s3.put_object(Bucket='my-lambda-bucket-htmltopdf', Key='formulario.pdf', Body=pdf)
+    s3.put_object(Bucket='html-to-pdf-application', Key='formulario.pdf', Body=pdf)

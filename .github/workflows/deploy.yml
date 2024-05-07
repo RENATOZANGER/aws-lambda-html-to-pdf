@@ -2,8 +2,8 @@ name: Deploy Lambda Function
 
 env:
     REGION: "us-east-1"
-    NAME_BUCKET_TERRAFORM: "lambda-html-to-pdf-remote-state"
-    NAME_BUCKET_APP: "my-lambda-bucket-htmltopdf"
+    NAME_BUCKET_TERRAFORM: "html-to-pdf-remote-state"
+    NAME_BUCKET_APP: "html-to-pdf-application"
     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   
