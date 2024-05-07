@@ -17,7 +17,7 @@ resource "aws_lambda_function" "my_lambda" {
   role          = aws_iam_role.lambda_role.arn
   timeout       = 90
 
-  source_code_hash = filebase64sha256("s3://my-lambda-bucket-zip-htmltopdf/lambda_function.zip")
+  #source_code_hash = filebase64sha256("")
 
   s3_bucket = "my-lambda-bucket-zip-htmltopdf"
   s3_key    = "lambda_function.zip"
