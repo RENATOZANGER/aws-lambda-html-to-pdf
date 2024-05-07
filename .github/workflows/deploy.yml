@@ -74,8 +74,8 @@ jobs:
       run: |
         mkdir -p temp/app
         cp -r app/* temp/app/
-        cp -r ~/.local/lib/python3.11/site-packages/* temp/
-    
+        cp -r /opt/hostedtoolcache/Python/3.11.9/x64/lib/python3.11/site-packages/* temp/
+
     - name: Zip files
       run: |
         cd temp
