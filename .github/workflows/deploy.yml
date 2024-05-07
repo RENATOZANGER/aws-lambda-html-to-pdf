@@ -70,20 +70,11 @@ jobs:
       run: |
         pip install -r ./app/requirements.txt
     
-    - name: Copy dependencies
+    - name: Copy code and dependencies
       run: |
-        mkdir -p temp
-        if [ -n "$(ls -A ~/.local/lib/python3.11/site-packages/)" ]; then
-          cp -r ~/.local/lib/python3.11/site-packages/* temp/
-        else
-          echo "No dependencies found in ~/.local/lib/python3.11/site-packages/"
-        fi
-
-    - name: Copy code
-      run: |
-       if [ ! -d temp/app ]; then  # Verifica se o diretório temp/app não existe
-        cp -r app temp/
-       fi
+        mkdir -p temp/app
+        cp -r ~/.local/lib/python3.11/site-packages/* temp/
+        cp -r app/* temp/app/
     
     - name: Zip files
       run: |
