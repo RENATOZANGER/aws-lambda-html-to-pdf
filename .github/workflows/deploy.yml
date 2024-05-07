@@ -204,11 +204,3 @@ jobs:
     - name: Terraform Apply
       run: terraform apply -auto-approve || echo "Terraform apply failed"
       working-directory: ./infra
-    
-    - name: Check Terraform Apply Status
-      if: ${{ failure() }}
-      run: echo "Terraform apply failed"
-
-    - name: Additional Step
-      if: ${{ success() }}
-      run: echo "Terraform apply succeeded and proceeding with next steps"
