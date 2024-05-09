@@ -15,4 +15,4 @@ def handler(event, context):
     config = pdfkit.configuration(wkhtmltopdf='/opt/bin/wkhtmltopdf')
     pdf = pdfkit.from_string(template, configuration=config)
 
-    s3.put_object(Bucket='html-to-pdf-application', Key='formulario.pdf', Body=pdf)
+    s3.put_object(Bucket='html-to-pdf-application', Key='/result/formulario.pdf', Body=pdf)

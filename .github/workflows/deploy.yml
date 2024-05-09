@@ -153,7 +153,7 @@ jobs:
 
     - name: Upload code_and_dependencies.zip to S3
       run: |
-        aws s3 cp code_and_dependencies.zip s3://${{ env.NAME_BUCKET_APP }}/lambda_function.zip
+        aws s3 cp code_and_dependencies.zip s3://${{ env.NAME_BUCKET_APP }}/zip/lambda_function.zip
       env:
         AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
@@ -166,7 +166,7 @@ jobs:
     
     - name: Upload wkhtmltopdf layer to S3
       run: |
-            aws s3 cp wkhtmltopdf.zip s3://${{ env.NAME_BUCKET_APP }}/wkhtmltopdf.zip
+            aws s3 cp wkhtmltopdf.zip s3://${{ env.NAME_BUCKET_APP }}/zip/wkhtmltopdf.zip
       env:
         AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
