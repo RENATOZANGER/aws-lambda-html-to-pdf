@@ -11,7 +11,6 @@ def handler(event, context):
         'age': event['age']
     }
     template = Environment(loader=FileSystemLoader('.')).get_template('app/form.html').render(dados)
-    #config = pdfkit.configuration(wkhtmltopdf='/usr/local/bin/wkhtmltopdf')
     config = pdfkit.configuration(wkhtmltopdf='/opt/bin/wkhtmltopdf')
     pdf = pdfkit.from_string(template, configuration=config)
 
